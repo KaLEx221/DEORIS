@@ -122,7 +122,7 @@ RUN rm -f /etc/nginx/sites-enabled/default
 
 RUN printf '%s\n' \
 'server {' \
-'    listen 80;' \
+'    listen 10000;' \
 '    server_name _;' \
 '    root /var/www/html/public;' \
 '    index index.php index.html;' \
@@ -145,7 +145,7 @@ RUN printf '%s\n' \
 # =========================
 # Port
 # =========================
-EXPOSE 80
+EXPOSE 10000
 
 
 # =========================
