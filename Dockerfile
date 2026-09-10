@@ -9,7 +9,10 @@ FROM composer:2.7 AS composer
 # =========================
 FROM php:8.3-fpm
 
-# Install system dependencies
+
+# =========================
+# Install System Dependencies
+# =========================
 RUN apt-get update && apt-get install -y \
     nginx \
     git \
@@ -19,17 +22,17 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libpq-dev \
     zip \
     unzip \
     nodejs \
     npm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-    libpq-dev \
 
 
 # =========================
-# PHP Extensions
+# Install PHP Extensions
 # =========================
 RUN docker-php-ext-install \
     pdo \
@@ -45,7 +48,7 @@ RUN docker-php-ext-install \
 
 
 # =========================
-# Redis PHP Extension
+# Install Redis PHP Extension
 # =========================
 RUN pecl install redis \
     && docker-php-ext-enable redis
