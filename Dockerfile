@@ -161,4 +161,4 @@ EXPOSE 10000
 # =========================
 # Start Laravel + Nginx
 # =========================
-CMD ["sh", "-c", "sed -i \"s/listen 10000;/listen ${PORT};/\" /etc/nginx/conf.d/default.conf && php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "sed -i \"s/listen 0.0.0.0:10000;/listen 0.0.0.0:${PORT};/\" /etc/nginx/conf.d/default.conf && php-fpm -D && nginx -g 'daemon off;'"]
