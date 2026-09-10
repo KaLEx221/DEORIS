@@ -3,12 +3,10 @@
 # =========================
 FROM composer:2.7 AS composer
 
-
 # =========================
 # Stage 2: Laravel + Nginx
 # =========================
 FROM php:8.3-fpm
-
 
 # =========================
 # Install System Dependencies
@@ -30,7 +28,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-
 # =========================
 # Install PHP Extensions
 # =========================
@@ -46,25 +43,21 @@ RUN docker-php-ext-install \
     gd \
     zip
 
-
 # =========================
 # Install Redis PHP Extension
 # =========================
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
-
 # =========================
 # Install Composer
 # =========================
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-
 # =========================
 # Working Directory
 # =========================
 WORKDIR /var/www/html
-
 
 # =========================
 # PHP Dependencies
@@ -77,7 +70,6 @@ RUN composer install \
     --no-interaction \
     --no-scripts
 
-
 # =========================
 # Node / React Dependencies
 # =========================
@@ -85,24 +77,20 @@ COPY package.json package-lock.json ./
 
 RUN npm ci
 
-
 # =========================
 # Copy Application
 # =========================
 COPY . .
-
 
 # =========================
 # Build React / Vite
 # =========================
 RUN npm run build
 
-
 # =========================
 # Laravel Composer Scripts
 # =========================
 RUN composer run-script post-autoload-dump
-
 
 # =========================
 # Permissions
@@ -114,7 +102,6 @@ RUN chown -R www-data:www-data \
     /var/www/html/storage \
     /var/www/html/bootstrap/cache
 
-
 # =========================
 # Nginx Configuration
 # =========================
@@ -122,7 +109,7 @@ RUN rm -f /etc/nginx/sites-enabled/default
 
 RUN printf '%s\n' \
 'server {' \
-'    listen ${PORT};
+'    listen 10000;' \
 '    server_name _;' \
 '    root /var/www/html/public;' \
 '    index index.php index.html;' \
@@ -141,12 +128,10 @@ RUN printf '%s\n' \
 '}' \
 > /etc/nginx/conf.d/default.conf
 
-
 # =========================
 # Port
 # =========================
 EXPOSE 10000
-
 
 # =========================
 # Start Laravel + Nginx
