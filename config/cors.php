@@ -41,23 +41,23 @@ return [
     |
     */
 
-    'paths' => ['api/*'],
-
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'api/login', 'api/logout'],
     'allowed_methods' => ['GET', 'POST', 'PATCH', 'OPTIONS'],
 
-    'allowed_origins' => [
-        env('APP_URL', 'https://deoris.test'),
-        env('ENTRYEASE_URL', 'https://entryease.deoris.test'),
-        env('ENROLLEASE_URL', 'https://enrollease.deoris.test'),
-        env('GRADETRACK_URL', 'https://gradetrack.deoris.test'),
-        env('MEDITRACK_URL', 'https://meditrack.deoris.test'),
-        env('LIBRARYSYS_URL', 'https://librarysys.deoris.test'),
-        env('TASKFLOW_URL', 'https://taskflow.deoris.test'),
-        env('CAREERCONNECT_URL', 'https://careerconnect.deoris.test'),
-        env('ASSESSPAY_URL', 'https://assesspay.deoris.test'),
-        env('VOTESYS_URL', 'https://votesys.deoris.test'),
+ 'allowed_origins' => [
+    env('APP_URL', 'https://deoris.test'),
+    env('ENTRYEASE_URL', 'https://entryease.deoris.test'),
+    env('ENROLLEASE_URL', 'https://enrollease.deoris.test'),
+    env('GRADETRACK_URL', 'https://gradetrack.deoris.test'),
+    env('MEDITRACK_URL', 'https://meditrack.deoris.test'),
+    env('LIBRARYSYS_URL', 'https://librarysys.deoris.test'),
+    env('TASKFLOW_URL', 'https://taskflow.deoris.test'),
+    env('CAREERCONNECT_URL', 'https://careerconnect.deoris.test'),
+    env('ASSESSPAY_URL', 'https://assesspay.deoris.test'),
+    env('VOTESYS_URL', 'https://votesys.deoris.test'),
         env('CLEARCHECK_URL', 'https://clearcheck.deoris.test'),
-    ],
+        env('FRONTEND_URL', 'http://localhost:5173'),
+],
 
     'allowed_origins_patterns' => [],
 

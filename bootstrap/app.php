@@ -10,6 +10,7 @@ use App\Http\Middleware\EnsureModuleAccess;
 use App\Http\Middleware\ForceIframeSsoSessionCookies;
 use App\Http\Middleware\PortalCspMiddleware;
 use App\Http\Middleware\EnforceSsoSecurityHeaders;
+use Illuminate\Http\Middleware\HandleCors;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,7 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(HandleCors::class);
+
         $middleware->alias([
+
             'role'             => EnsureUserHasRole::class,
             'module.access'    => EnsureModuleAccess::class,
             'two-factor.confirmed' => EnsureTwoFactorAuthenticationIsConfirmed::class,

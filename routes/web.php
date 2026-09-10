@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\EventLogController;
 use App\Http\Controllers\Api\FederatedSearchController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Auth\JsonLoginController;
 use App\Http\Controllers\DashboardController;
 use App\Models\User;
 use App\Services\ModuleRegistry;
@@ -30,6 +31,10 @@ $portalRoutes = static function (): void {
             ? redirect()->route('homepage')
             : redirect()->route('login');
     })->name('login.redirect');
+
+    // JSON login API for SPA frontend
+    Route::post('/api/login', [JsonLoginController::class, 'login']);
+    Route::post('/api/logout', [JsonLoginController::class, 'logout'])->middleware('auth:web');
 
     // ── Authenticated portal shell ───────────────────────────────────────────
 
