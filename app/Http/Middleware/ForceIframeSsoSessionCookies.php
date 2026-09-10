@@ -4,37 +4,29 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
 use Symfony\Component\HttpFoundation\Response;
 
 class ForceIframeSsoSessionCookies
 {
-    private const PORTAL_SESSION_COOKIE = '__Host-deoris_identity_session';
+    /**
+     * Host-only cookie without the __Host- prefix. Chrome third-party cookie
+     * rules (Vercel SPA → Render API) drop or ignore many __Host- cookies.
+     */
+    private const PORTAL_SESSION_COOKIE = 'deoris_identity_session';
 
     /**
-     * Previous cookie names/domains that can collide with the corrected
-     * host-only SSO cookie in real browsers.
-     *
      * @var array<int, string>
      */
     private const LEGACY_SESSION_COOKIES = [
-        'deoris_identity_session',
+        '__Host-deoris_identity_session',
         'deoris_portal_session',
         'laravel_session',
     ];
 
-    /**
-     * Sanctum's stateful middleware intentionally defaults session.same_site to
-     * "lax" for normal SPAs. DEORIS modules fetch back to the portal from HTTPS
-     * iframes, so the portal session cookie must remain SameSite=None; Secure.
-     *
-     * The cookie is host-only and __Host-prefixed so module subdomains cannot
-     * overwrite it with their own Set-Cookie headers during fast iframe switches.
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        // ── Pin ALL critical config values from .env ─────────────────────────
         $appKey = $this->readEnvValue(base_path('.env'), 'APP_KEY');
         if ($appKey) {
             config(['app.key' => $appKey]);
@@ -42,9 +34,25 @@ class ForceIframeSsoSessionCookies
 
         $this->migrateLegacySessionCookie($request);
 
-        $originHost = parse_url((string) $request->headers->get('Origin'), PHP_URL_HOST);
-        $isCrossSite = is_string($originHost) && $originHost !== '' && $originHost !== $request->getHost();
+        $this->pinSessionCookieConfig();
 
+        $response = $next($request);
+
+        // Sanctum's stateful API middleware may switch same_site back to lax
+        // during the request. Re-pin and rewrite cookies so Vercel XHR can
+        // store and send them (SameSite=None; Secure; Partitioned).
+        $this->pinSessionCookieConfig();
+        $this->forceCrossSiteCookieFlags($response);
+
+        foreach (self::LEGACY_SESSION_COOKIES as $cookieName) {
+            $response->headers->setCookie(Cookie::forget($cookieName, '/'));
+        }
+
+        return $response;
+    }
+
+    private function pinSessionCookieConfig(): void
+    {
         config([
             'app.env'              => env('APP_ENV', 'local'),
             'session.driver'       => env('SESSION_DRIVER', 'database'),
@@ -54,44 +62,33 @@ class ForceIframeSsoSessionCookies
             'session.http_only'    => true,
             'session.same_site'    => 'none',
             'session.secure'       => true,
-            'session.partitioned'  => $isCrossSite || (bool) env('SESSION_PARTITIONED_COOKIE', false),
+            'session.partitioned'  => true,
             'broadcasting.default' => env('BROADCAST_CONNECTION', 'reverb'),
         ]);
-        $response = $next($request);
-        $legacyDomain = $this->legacyCookieDomain();
+    }
 
-        $guardSessionKey = Auth::guard('web')->getName();
-        $session = $request->hasSession() ? $request->session() : null;
-        $sessionKeys = [];
+    private function forceCrossSiteCookieFlags(Response $response): void
+    {
+        $names = [self::PORTAL_SESSION_COOKIE, 'XSRF-TOKEN'];
 
-        if ($session !== null) {
-            $all = $session->all();
-            if (is_array($all)) {
-                $sessionKeys = array_keys($all);
+        foreach ($response->headers->getCookies() as $cookie) {
+            if (! in_array($cookie->getName(), $names, true)) {
+                continue;
             }
+
+            $response->headers->setCookie(new SymfonyCookie(
+                $cookie->getName(),
+                $cookie->getValue(),
+                $cookie->getExpiresTime(),
+                '/',
+                null,
+                true,
+                $cookie->isHttpOnly(),
+                $cookie->isRaw(),
+                SymfonyCookie::SAMESITE_NONE,
+                true,
+            ));
         }
-
-        $hasLoginKey = $session !== null && $session->has($guardSessionKey);
-        $hasPortalCookie = $request->cookies->has(self::PORTAL_SESSION_COOKIE);
-        $isPortalHost = $request->getHost() === (string) parse_url((string) config('app.url'), PHP_URL_HOST);
-        $shouldLogSessionState = $isPortalHost && (
-            $request->is('api/v1/sso/*') ||
-            $request->is('/') ||
-            $request->is('homepage') ||
-            ($hasPortalCookie && ! $hasLoginKey)
-        );
-
-        if ($shouldLogSessionState) {
-        }
-
-        foreach (self::LEGACY_SESSION_COOKIES as $cookieName) {
-            $response->headers->setCookie(Cookie::forget($cookieName, '/'));
-            if ($legacyDomain !== null) {
-                $response->headers->setCookie(Cookie::forget($cookieName, '/', $legacyDomain));
-            }
-        }
-
-        return $response;
     }
 
     private function migrateLegacySessionCookie(Request $request): void
@@ -112,37 +109,32 @@ class ForceIframeSsoSessionCookies
 
     private function readEnvValue(string $envFile, string $key): ?string
     {
-        if (! is_readable($envFile)) return null;
+        if (! is_readable($envFile)) {
+            return null;
+        }
+
         foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-            if ($line === '' || $line[0] === '#') continue;
+            if ($line === '' || $line[0] === '#') {
+                continue;
+            }
             $eq = strpos($line, '=');
-            if ($eq === false) continue;
-            if (trim(substr($line, 0, $eq)) !== $key) continue;
+            if ($eq === false) {
+                continue;
+            }
+            if (trim(substr($line, 0, $eq)) !== $key) {
+                continue;
+            }
             $val = trim(substr($line, $eq + 1));
-            if (strlen($val) >= 2 && $val[0] === '"'  && $val[-1] === '"')  $val = substr($val, 1, -1);
-            if (strlen($val) >= 2 && $val[0] === "'"  && $val[-1] === "'")  $val = substr($val, 1, -1);
+            if (strlen($val) >= 2 && $val[0] === '"' && $val[-1] === '"') {
+                $val = substr($val, 1, -1);
+            }
+            if (strlen($val) >= 2 && $val[0] === "'" && $val[-1] === "'") {
+                $val = substr($val, 1, -1);
+            }
+
             return $val;
         }
+
         return null;
-    }
-
-    private function legacyCookieDomain(): ?string
-    {
-        $sessionDomain = env('SESSION_DOMAIN');
-        if (is_string($sessionDomain) && $sessionDomain !== '' && strtolower($sessionDomain) !== 'null') {
-            return str_starts_with($sessionDomain, '.') ? $sessionDomain : ".{$sessionDomain}";
-        }
-
-        $appUrl = env('APP_URL');
-        if (! is_string($appUrl) || $appUrl === '') {
-            return null;
-        }
-
-        $host = parse_url($appUrl, PHP_URL_HOST);
-        if (! is_string($host) || $host === '') {
-            return null;
-        }
-
-        return ".{$host}";
     }
 }

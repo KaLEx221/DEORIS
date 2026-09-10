@@ -43,7 +43,14 @@ class SsoController extends Controller
     {
         $startedAt = microtime(true);
         try {
-            $user = $this->portalSessionUser();
+            $user = $this->portalSessionUser($request);
+
+            if (! $user) {
+                $user = $this->recoverSessionUserFromSessionTable($request);
+                if ($user instanceof User) {
+                    $this->rehydrateWebSession($request, $user);
+                }
+            }
 
             if (! $user) {
                 SsoAuditLog::logSessionCheckFailed('no_authenticated_user');
@@ -86,7 +93,7 @@ class SsoController extends Controller
     {
         $startedAt = microtime(true);
         try {
-            $user = $this->portalSessionUser();
+            $user = $this->portalSessionUser($request);
             $recoveredFromSessionTable = false;
 
             if (! $user) {
@@ -294,9 +301,9 @@ class SsoController extends Controller
         return $payload;
     }
 
-    private function portalSessionUser(): ?User
+    private function portalSessionUser(Request $request): ?User
     {
-        $user = auth('web')->user();
+        $user = $request->user('web') ?? Auth::guard('web')->user();
 
         return $user instanceof User ? $user : null;
     }
