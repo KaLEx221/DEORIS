@@ -122,7 +122,7 @@ RUN rm -f /etc/nginx/sites-enabled/default
 
 RUN printf '%s\n' \
 'server {' \
-'    listen 10000;' \
+'    listen ${PORT};
 '    server_name _;' \
 '    root /var/www/html/public;' \
 '    index index.php index.html;' \
@@ -151,4 +151,4 @@ EXPOSE 10000
 # =========================
 # Start Laravel + Nginx
 # =========================
-CMD ["sh", "-c", "php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "sed -i \"s/listen 10000;/listen ${PORT};/\" /etc/nginx/conf.d/default.conf && php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'"]
