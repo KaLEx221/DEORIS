@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     npm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+    libpq-dev \
 
 
 # =========================
