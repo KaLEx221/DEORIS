@@ -162,4 +162,4 @@ EXPOSE 10000
 # =========================
 # Start Laravel + Nginx
 # =========================
-CMD ["sh", "-c", "export PORT=\"${PORT:-10000}\"; sed -i \"s/0.0.0.0:10000/0.0.0.0:${PORT}/\" /etc/nginx/conf.d/default.conf; php-fpm -D; nginx -g 'daemon off;'" ]
+CMD ["sh", "-c", "php artisan migrate --force; export PORT=\"${PORT:-10000}\"; sed -i \"s/0.0.0.0:10000/0.0.0.0:${PORT}/\" /etc/nginx/conf.d/default.conf; php-fpm -D; nginx -g 'daemon off;'"]
