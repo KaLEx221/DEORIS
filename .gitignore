@@ -23,7 +23,6 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /frontend/
-cookies.txt
 
 # Docker
 docker/nginx/certs/

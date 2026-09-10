@@ -11,8 +11,10 @@ use App\Listeners\SyncUserAdmissionStatus;
 use App\Listeners\SyncUserEnrollmentStatus;
 use App\Listeners\SyncUserPaymentStatus;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
+use App\Auth\EloquentUserProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,6 +42,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Auth::provider('eloquent', function ($app, array $config) {
+            return new EloquentUserProvider($app['hash'], $config['model']);
+        });
+
         // Pin Sanctum's token model to the named 'deoris' DB connection so
         // token lookups always hit deoris_identity_db, even when XAMPP reuses
         // a PHP worker thread whose MySQL connection was last used by a module.

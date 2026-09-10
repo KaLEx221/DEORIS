@@ -244,7 +244,7 @@ class UserEnrollmentSyncService
                 'name'               => $payload['student_name'] ?? "{$payload['first_name']} {$payload['last_name']}",
                 'email'              => $email,
                 'student_number'     => $payload['lrn'] ?? null,
-                'password'           => bcrypt(uniqid()),
+                'password'           => str()->password(32),
                 'role'               => User::ROLE_STUDENT,
                 'admission_status'   => User::ADMISSION_PENDING,
                 'enrollment_status'  => User::ENROLLMENT_NOT_ENROLLED,

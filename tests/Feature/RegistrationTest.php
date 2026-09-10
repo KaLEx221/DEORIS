@@ -52,4 +52,29 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('homepage', absolute: false));
     }
+
+    public function test_spa_json_register_creates_session(): void
+    {
+        if (! Features::enabled(Features::registration())) {
+            $this->markTestSkipped('Registration support is not enabled.');
+        }
+
+        $this->postJson('/api/register', [
+            'name' => 'Spa User',
+            'email' => 'spa@example.com',
+            'password' => $this->validPassword,
+            'password_confirmation' => $this->validPassword,
+            'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature(),
+        ])
+            ->assertCreated()
+            ->assertJsonPath('authenticated', true)
+            ->assertJsonPath('user.email', 'spa@example.com')
+            ->assertJsonPath('user.role', 'student');
+
+        $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', [
+            'email' => 'spa@example.com',
+            'role' => 'student',
+        ]);
+    }
 }

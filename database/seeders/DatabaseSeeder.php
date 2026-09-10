@@ -6,7 +6,6 @@ use App\Models\User;
 use Database\Seeders\ServiceRegistrySeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,7 +25,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Admin',
                 'email'             => 'admin@example.com',
-                'password'          => Hash::make('Admin@Password1'),
+                'password'          => 'Admin@Password1',
                 'role'              => User::ROLE_ADMIN,
                 'email_verified_at' => now(),
             ],
@@ -34,7 +33,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Student',
                 'email'             => 'student@example.com',
-                'password'          => Hash::make('Student@Password1'),
+                'password'          => 'Student@Password1',
                 'role'              => User::ROLE_STUDENT,
                 'admission_status'  => User::ADMISSION_PENDING,
                 'enrollment_status' => User::ENROLLMENT_NOT_ENROLLED,
@@ -45,7 +44,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Student Approved',
                 'email'             => 'student.approved@example.com',
-                'password'          => Hash::make('Student@Password1'),
+                'password'          => 'Student@Password1',
                 'role'              => User::ROLE_STUDENT,
                 'admission_status'  => User::ADMISSION_APPROVED,
                 'enrollment_status' => User::ENROLLMENT_NOT_ENROLLED,
@@ -56,7 +55,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Student Enrolled',
                 'email'             => 'student.enrolled@example.com',
-                'password'          => Hash::make('Student@Password1'),
+                'password'          => 'Student@Password1',
                 'role'              => User::ROLE_STUDENT,
                 'admission_status'  => User::ADMISSION_APPROVED,
                 'enrollment_status' => User::ENROLLMENT_ENROLLED,
@@ -67,7 +66,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Student Cleared',
                 'email'             => 'student.cleared@example.com',
-                'password'          => Hash::make('Student@Password1'),
+                'password'          => 'Student@Password1',
                 'role'              => User::ROLE_STUDENT,
                 'admission_status'  => User::ADMISSION_APPROVED,
                 'enrollment_status' => User::ENROLLMENT_ENROLLED,
@@ -78,7 +77,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Instructor',
                 'email'             => 'instructor@example.com',
-                'password'          => Hash::make('Instructor@Password1'),
+                'password'          => 'Instructor@Password1',
                 'role'              => User::ROLE_INSTRUCTOR,
                 'email_verified_at' => now(),
             ],
@@ -86,7 +85,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Cashier',
                 'email'             => 'cashier@example.com',
-                'password'          => Hash::make('Cashier@Password1'),
+                'password'          => 'Cashier@Password1',
                 'role'              => User::ROLE_CASHIER,
                 'email_verified_at' => now(),
             ],
@@ -94,7 +93,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Librarian',
                 'email'             => 'librarian@example.com',
-                'password'          => Hash::make('Librarian@Password1'),
+                'password'          => 'Librarian@Password1',
                 'role'              => User::ROLE_LIBRARIAN,
                 'email_verified_at' => now(),
             ],
@@ -102,7 +101,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Admission Officer',
                 'email'             => 'admission@example.com',
-                'password'          => Hash::make('Admission@Password1'),
+                'password'          => 'Admission@Password1',
                 'role'              => User::ROLE_ADMISSION_OFFICER,
                 'email_verified_at' => now(),
             ],
@@ -110,7 +109,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Career Officer',
                 'email'             => 'career@example.com',
-                'password'          => Hash::make('Career@Password1'),
+                'password'          => 'Career@Password1',
                 'role'              => User::ROLE_CAREER_OFFICER,
                 'email_verified_at' => now(),
             ],
@@ -118,7 +117,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Nurse',
                 'email'             => 'nurse@example.com',
-                'password'          => Hash::make('Nurse@Password1234'),
+                'password'          => 'Nurse@Password1234',
                 'role'              => User::ROLE_NURSE,
                 'email_verified_at' => now(),
             ],
@@ -126,7 +125,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'              => 'Election Officer',
                 'email'             => 'election@example.com',
-                'password'          => Hash::make('Election@Password1'),
+                'password'          => 'Election@Password1',
                 'role'              => User::ROLE_ELECTION_OFFICER,
                 'email_verified_at' => now(),
             ],

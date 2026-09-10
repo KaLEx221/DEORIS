@@ -3,28 +3,21 @@
 namespace App\Http\Responses;
 
 use App\Models\User;
-use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 
-class LoginResponse implements LoginResponseContract
+class RegisterResponse implements RegisterResponseContract
 {
     /**
-     * After a successful login, always send the user to the portal home.
-     *
-     * Cross-origin SPA clients (Vercel) must receive JSON. Redirecting them
-     * to /homepage makes the original /login XHR follow into a Blade page
-     * and show up as a 500 in DevTools.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function toResponse($request)
     {
-        if ($this->shouldReturnJson($request)) {
+        if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
             /** @var User|null $user */
             $user = $request->user();
 
             return response()->json([
-                'two_factor' => false,
                 'authenticated' => true,
                 'user' => $user instanceof User ? [
                     'id' => $user->id,
@@ -33,17 +26,9 @@ class LoginResponse implements LoginResponseContract
                     'role' => $user->role,
                     'email_verified_at' => $user->email_verified_at,
                 ] : null,
-            ]);
+            ], 201);
         }
 
         return redirect()->intended(config('fortify.home', '/homepage'));
-    }
-
-    private function shouldReturnJson($request): bool
-    {
-        return $request->expectsJson()
-            || $request->wantsJson()
-            || $request->ajax()
-            || $request->is('api/*');
     }
 }

@@ -49,20 +49,16 @@ Route::prefix('v1')->group(function () {
     // - StartSession middleware enabled in bootstrap/app.php for all api routes
     Route::prefix('sso')->name('sso.')->middleware('sso.throttle', 'sso.secure')->group(function (): void {
         Route::get('/check', [SsoController::class, 'checkSession'])
-            ->name('check')
-            ->block(10, 10);
+            ->name('check');
 
         Route::get('/token', [SsoController::class, 'issueToken'])
-            ->name('token')
-            ->block(10, 10);
+            ->name('token');
 
         Route::post('/exchange', [SsoController::class, 'exchangeToken'])
-            ->name('exchange')
-            ->block(10, 10);
+            ->name('exchange');
 
         Route::post('/revoke', [SsoController::class, 'revokeToken'])
-            ->name('revoke')
-            ->block(10, 10);
+            ->name('revoke');
     });
 
     // ── Module-signed identity admin (EntryEase admin UI proxies here) ───────
@@ -132,10 +128,10 @@ Route::prefix('v1')->group(function () {
 // Tests and older module integrations may call /api/sso/* without the v1 prefix.
 // These aliases ensure backward compatibility without duplicating logic.
 Route::prefix('sso')->middleware('sso.throttle', 'sso.secure')->group(function (): void {
-    Route::get('/check', [SsoController::class, 'checkSession'])->block(10, 10);
-    Route::get('/token', [SsoController::class, 'issueToken'])->block(10, 10);
-    Route::post('/exchange', [SsoController::class, 'exchangeToken'])->block(10, 10);
-    Route::post('/revoke', [SsoController::class, 'revokeToken'])->block(10, 10);
+    Route::get('/check', [SsoController::class, 'checkSession']);
+    Route::get('/token', [SsoController::class, 'issueToken']);
+    Route::post('/exchange', [SsoController::class, 'exchangeToken']);
+    Route::post('/revoke', [SsoController::class, 'revokeToken']);
 });
 
 // ── Legacy unversioned event ingest alias ────────────────────────────────────

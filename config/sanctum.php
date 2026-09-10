@@ -35,7 +35,7 @@ return [
     // then fall back to bearer tokens only for token-only calls like exchange.
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s,%s',
-        'deoris.test,entryease.deoris.test,enrollease.deoris.test,gradetrack.deoris.test,meditrack.deoris.test,librarysys.deoris.test,taskflow.deoris.test,careerconnect.deoris.test,assesspay.deoris.test,votesys.deoris.test,clearcheck.deoris.test,localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+        'deoris.vercel.app,deoris.onrender.com,deoris.test,entryease.deoris.test,enrollease.deoris.test,gradetrack.deoris.test,meditrack.deoris.test,librarysys.deoris.test,taskflow.deoris.test,careerconnect.deoris.test,assesspay.deoris.test,votesys.deoris.test,clearcheck.deoris.test,localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
         Sanctum::currentApplicationUrlWithPort(),
         // Sanctum::currentRequestHost(),
     ))),

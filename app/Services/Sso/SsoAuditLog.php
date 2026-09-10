@@ -28,7 +28,7 @@ class SsoAuditLog
      */
     public static function logTokenIssued(User $user, string $tokenId): void
     {
-        Log::channel(self::CHANNEL)->info('SSO token issued', [
+        self::write('info', 'SSO token issued', [
             'event' => 'token_issued',
             'user_id' => $user->id,
             'user_email' => $user->email,
@@ -42,7 +42,7 @@ class SsoAuditLog
      */
     public static function logTokenExchanged(User $user, string $tokenId, ?string $origin = null): void
     {
-        Log::channel(self::CHANNEL)->info('SSO token exchanged', [
+        self::write('info', 'SSO token exchanged', [
             'event' => 'token_exchanged',
             'user_id' => $user->id,
             'user_email' => $user->email,
@@ -57,7 +57,7 @@ class SsoAuditLog
      */
     public static function logTokenExchangeFailed(string $reason, ?string $tokenHint = null, ?string $origin = null): void
     {
-        Log::channel(self::CHANNEL)->warning('SSO token exchange failed', [
+        self::write('warning', 'SSO token exchange failed', [
             'event' => 'token_exchange_failed',
             'reason' => $reason,
             'token_hint' => $tokenHint ? substr($tokenHint, 0, 8) . '***' : null,
@@ -71,7 +71,7 @@ class SsoAuditLog
      */
     public static function logTokenRevoked(?User $user = null, ?string $tokenId = null): void
     {
-        Log::channel(self::CHANNEL)->info('SSO token revoked', [
+        self::write('info', 'SSO token revoked', [
             'event' => 'token_revoked',
             'user_id' => $user?->id,
             'token_id' => $tokenId ? substr($tokenId, 0, 8) . '***' : null,
@@ -84,7 +84,7 @@ class SsoAuditLog
      */
     public static function logSessionChecked(User $user): void
     {
-        Log::channel(self::CHANNEL)->debug('SSO session check passed', [
+        self::write('debug', 'SSO session check passed', [
             'event' => 'session_check_passed',
             'user_id' => $user->id,
             'user_email' => $user->email,
@@ -97,7 +97,7 @@ class SsoAuditLog
      */
     public static function logSessionCheckFailed(string $reason): void
     {
-        Log::channel(self::CHANNEL)->warning('SSO session check failed', [
+        self::write('warning', 'SSO session check failed', [
             'event' => 'session_check_failed',
             'reason' => $reason,
             'timestamp' => now()->toIso8601String(),
@@ -109,7 +109,7 @@ class SsoAuditLog
      */
     public static function logSuspiciousOrigin(string $origin, string $reason): void
     {
-        Log::channel(self::CHANNEL)->warning('Suspicious SSO origin attempt', [
+        self::write('warning', 'Suspicious SSO origin attempt', [
             'event' => 'suspicious_origin',
             'origin' => $origin,
             'reason' => $reason,
@@ -122,11 +122,23 @@ class SsoAuditLog
      */
     public static function logStaleTokenCleanup(User $user, int $count): void
     {
-        Log::channel(self::CHANNEL)->notice('Stale SSO tokens cleaned up', [
+        self::write('notice', 'Stale SSO tokens cleaned up', [
             'event' => 'stale_tokens_cleanup',
             'user_id' => $user->id,
             'tokens_revoked' => $count,
             'timestamp' => now()->toIso8601String(),
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private static function write(string $level, string $message, array $context): void
+    {
+        try {
+            Log::channel(self::CHANNEL)->log($level, $message, $context);
+        } catch (\Throwable) {
+            Log::$level($message, $context);
+        }
     }
 }

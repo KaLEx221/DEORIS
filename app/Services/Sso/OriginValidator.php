@@ -32,6 +32,8 @@ class OriginValidator
      * @var array<int, string>
      */
     private const ALLOWED_ORIGINS = [
+        'https://deoris.vercel.app',
+        'https://deoris.onrender.com',
         'https://deoris.test',
         'https://entryease.deoris.test',
         'https://enrollease.deoris.test',

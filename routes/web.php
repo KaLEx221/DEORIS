@@ -32,10 +32,6 @@ $portalRoutes = static function (): void {
             : redirect()->route('login');
     })->name('login.redirect');
 
-    // JSON login API for SPA frontend
-    Route::post('/api/login', [JsonLoginController::class, 'login']);
-    Route::post('/api/logout', [JsonLoginController::class, 'logout'])->middleware('auth:web');
-
     // ── Authenticated portal shell ───────────────────────────────────────────
 
     Route::middleware(['auth', config('jetstream.auth_session'), 'verified'])
@@ -96,6 +92,15 @@ if (is_string($portalHost) && $portalHost !== '') {
     // Fallback for unusual APP_URL values so routes still boot.
     Route::group([], $portalRoutes);
 }
+
+// SPA auth must not be host-locked. Vercel calls Render by hostname even when
+// APP_URL is a different portal domain, and tests use localhost.
+Route::get('/api/csrf-token', function () {
+    return response()->json(['csrf_token' => csrf_token()]);
+});
+Route::post('/api/login', [JsonLoginController::class, 'login']);
+Route::post('/api/register', [JsonLoginController::class, 'register']);
+Route::post('/api/logout', [JsonLoginController::class, 'logout'])->middleware('auth:web');
 
 // ===========================================================================
 // MODULE SUBDOMAINS — {module}.<portal-domain>

@@ -21,10 +21,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+        $middleware->statefulApi();
         $middleware->prepend(HandleCors::class);
 
         $middleware->alias([
-
+            
             'role'             => EnsureUserHasRole::class,
             'module.access'    => EnsureModuleAccess::class,
             'two-factor.confirmed' => EnsureTwoFactorAuthenticationIsConfirmed::class,

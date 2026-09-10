@@ -3,7 +3,6 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -38,7 +37,7 @@ class CreateNewUser implements CreatesNewUsers
         return User::create([
             'name' => $sanitized['name'],
             'email' => $sanitized['email'],
-            'password' => Hash::make($sanitized['password']),
+            'password' => $sanitized['password'],
             'role' => User::ROLE_STUDENT,
         ]);
     }

@@ -22,19 +22,27 @@ class SsoThrottle
         );
         $key = 'sso:' . $bucket . ':' . sha1($identity);
 
-        if (RateLimiter::tooManyAttempts($key, $limit)) {
-            $retryAfter = RateLimiter::availableIn($key);
+        try {
+            if (RateLimiter::tooManyAttempts($key, $limit)) {
+                $retryAfter = RateLimiter::availableIn($key);
 
-            return $this->throttledResponse($retryAfter);
+                return $this->throttledResponse($retryAfter);
+            }
+
+            RateLimiter::hit($key, 60);
+        } catch (\Throwable) {
+            return $next($request);
         }
-
-        RateLimiter::hit($key, 60);
 
         /** @var Response $response */
         $response = $next($request);
-        $remaining = max(0, $limit - RateLimiter::attempts($key));
-        $response->headers->set('X-Sso-RateLimit-Limit', (string) $limit);
-        $response->headers->set('X-Sso-RateLimit-Remaining', (string) $remaining);
+        try {
+            $remaining = max(0, $limit - RateLimiter::attempts($key));
+            $response->headers->set('X-Sso-RateLimit-Limit', (string) $limit);
+            $response->headers->set('X-Sso-RateLimit-Remaining', (string) $remaining);
+        } catch (\Throwable) {
+            // Auth must still succeed if the cache store is down (Render without Redis).
+        }
 
         return $response;
     }

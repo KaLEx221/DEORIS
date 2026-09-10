@@ -41,10 +41,21 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'api/login', 'api/logout'],
-    'allowed_methods' => ['GET', 'POST', 'PATCH', 'OPTIONS'],
+    'paths' => [
+        'api/*',
+        'sanctum/csrf-cookie',
+        'login',
+        'logout',
+        'register',
+        'forgot-password',
+        'reset-password',
+        'user/confirmed-password-status',
+        'email/verification-notification',
+        'two-factor-challenge',
+    ],
+    'allowed_methods' => ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
 
-    'allowed_origins' => [
+    'allowed_origins' => array_values(array_unique(array_filter([
         'https://deoris.vercel.app',
         'https://deoris.onrender.com',
         env('APP_URL', 'https://deoris.onrender.com'),
@@ -59,9 +70,11 @@ return [
         env('ASSESSPAY_URL', 'https://assesspay.deoris.test'),
         env('VOTESYS_URL', 'https://votesys.deoris.test'),
         env('CLEARCHECK_URL', 'https://clearcheck.deoris.test'),
-    ],
+    ]))),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https://deoris(-[a-z0-9-]+)?\\.vercel\\.app$#',
+    ],
 
     'allowed_headers' => [
         'Content-Type',
@@ -69,6 +82,7 @@ return [
         'Accept',
         'X-Requested-With',
         'X-XSRF-TOKEN',
+        'X-CSRF-TOKEN',
     ],
 
     'exposed_headers' => [],

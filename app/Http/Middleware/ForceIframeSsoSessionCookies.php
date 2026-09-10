@@ -42,6 +42,9 @@ class ForceIframeSsoSessionCookies
 
         $this->migrateLegacySessionCookie($request);
 
+        $originHost = parse_url((string) $request->headers->get('Origin'), PHP_URL_HOST);
+        $isCrossSite = is_string($originHost) && $originHost !== '' && $originHost !== $request->getHost();
+
         config([
             'app.env'              => env('APP_ENV', 'local'),
             'session.driver'       => env('SESSION_DRIVER', 'database'),
@@ -51,6 +54,7 @@ class ForceIframeSsoSessionCookies
             'session.http_only'    => true,
             'session.same_site'    => 'none',
             'session.secure'       => true,
+            'session.partitioned'  => $isCrossSite || (bool) env('SESSION_PARTITIONED_COOKIE', false),
             'broadcasting.default' => env('BROADCAST_CONNECTION', 'reverb'),
         ]);
         $response = $next($request);
