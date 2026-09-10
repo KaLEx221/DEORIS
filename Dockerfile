@@ -1,9 +1,20 @@
-FROM php:8.2-fpm
+# =========================
+# Stage 1: Composer
+# =========================
+FROM composer:2.7 AS composer
+
+
+# =========================
+# Stage 2: Laravel + Nginx
+# =========================
+FROM php:8.3-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    nginx \
     git \
     curl \
+    wget \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
@@ -15,42 +26,124 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Install Redis extension
-RUN pecl install redis && docker-php-ext-enable redis
+# Install PHP extensions
+RUN docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip
+
+
+# Install Redis PHP extension
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /var/www
 
-# Copy composer files first (layer caching)
+# Working directory
+WORKDIR /var/www/html
+
+
+# =========================
+# PHP Dependencies
+# =========================
+
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction \
+    --no-scripts
 
-# Copy package files and install Node dependencies
+
+# =========================
+# Node / React Dependencies
+# =========================
+
 COPY package.json package-lock.json ./
+
 RUN npm ci
 
-# Copy the rest of the application
+
+# =========================
+# Copy Application
+# =========================
+
 COPY . .
 
-# Build frontend assets
+
+# =========================
+# Build React / Vite
+# =========================
+
 RUN npm run build
 
-# Run post-install composer scripts
+
+# =========================
+# Laravel Composer Scripts
+# =========================
+
 RUN composer run-script post-autoload-dump
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage \
-    && chmod -R 755 /var/www/bootstrap/cache
 
-EXPOSE 9000
+# =========================
+# Permissions
+# =========================
 
-CMD ["php-fpm"]
+RUN chown -R www-data:www-data \
+    /var/www/html/storage \
+    /var/www/html/bootstrap/cache \
+    && chmod -R 775 \
+    /var/www/html/storage \
+    /var/www/html/bootstrap/cache
+
+
+# =========================
+# Nginx Configuration
+# =========================
+
+RUN rm -f /etc/nginx/sites-enabled/default
+
+RUN printf '%s\n' \
+'server {' \
+'    listen 80;' \
+'    server_name _;' \
+'    root /var/www/html/public;' \
+'    index index.php index.html;' \
+'' \
+'    location / {' \
+'        try_files $uri $uri/ /index.php?$query_string;' \
+'    }' \
+'' \
+'    location ~ \.php$ {' \
+'        try_files $uri =404;' \
+'        fastcgi_pass 127.0.0.1:9000;' \
+'        fastcgi_index index.php;' \
+'        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;' \
+'        include fastcgi_params;' \
+'    }' \
+'}' \
+> /etc/nginx/conf.d/default.conf
+
+
+# =========================
+# Port
+# =========================
+
+EXPOSE 80
+
+
+# =========================
+# Start Laravel
+# =========================
+
+CMD ["sh", "-c", "php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'"]
