@@ -27,10 +27,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
-# Install PHP extensions
+# =========================
+# PHP Extensions
+# =========================
 RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
+    pdo_pgsql \
+    pgsql \
     mbstring \
     exif \
     pcntl \
@@ -39,23 +43,28 @@ RUN docker-php-ext-install \
     zip
 
 
-# Install Redis PHP extension
+# =========================
+# Redis PHP Extension
+# =========================
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
 
+# =========================
 # Install Composer
+# =========================
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 
-# Working directory
+# =========================
+# Working Directory
+# =========================
 WORKDIR /var/www/html
 
 
 # =========================
 # PHP Dependencies
 # =========================
-
 COPY composer.json composer.lock ./
 
 RUN composer install \
@@ -68,7 +77,6 @@ RUN composer install \
 # =========================
 # Node / React Dependencies
 # =========================
-
 COPY package.json package-lock.json ./
 
 RUN npm ci
@@ -77,28 +85,24 @@ RUN npm ci
 # =========================
 # Copy Application
 # =========================
-
 COPY . .
 
 
 # =========================
 # Build React / Vite
 # =========================
-
 RUN npm run build
 
 
 # =========================
 # Laravel Composer Scripts
 # =========================
-
 RUN composer run-script post-autoload-dump
 
 
 # =========================
 # Permissions
 # =========================
-
 RUN chown -R www-data:www-data \
     /var/www/html/storage \
     /var/www/html/bootstrap/cache \
@@ -110,7 +114,6 @@ RUN chown -R www-data:www-data \
 # =========================
 # Nginx Configuration
 # =========================
-
 RUN rm -f /etc/nginx/sites-enabled/default
 
 RUN printf '%s\n' \
@@ -138,12 +141,10 @@ RUN printf '%s\n' \
 # =========================
 # Port
 # =========================
-
 EXPOSE 80
 
 
 # =========================
-# Start Laravel
+# Start Laravel + Nginx
 # =========================
-
 CMD ["sh", "-c", "php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'"]
