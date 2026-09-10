@@ -127,7 +127,7 @@ RUN rm -f /etc/nginx/sites-enabled/default
 
 RUN printf '%s\n' \
 'server {' \
-'    listen 10000;' \
+'    listen 0.0.0.0:10000;' \
 '    server_name _;' \
 '    root /var/www/html/public;' \
 '    index index.php index.html;' \
