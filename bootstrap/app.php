@@ -41,6 +41,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // tokens, so requiring a Blade CSRF token would create iframe 419s.
         $middleware->validateCsrfTokens(except: [
             'api/*',
+            'login',
+            'logout',
+            'register',
         ]);
 
         // ── CRITICAL: Pin config values BEFORE any middleware reads them ────────

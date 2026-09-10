@@ -38,7 +38,7 @@ Route::prefix('v1')->group(function () {
             'email_verified_at', 'admission_status',
             'enrollment_status', 'clearcheck_passed',
         ]));
-    })->middleware(['auth:sanctum', 'verified']);
+    })->middleware(['auth:sanctum']);
 
     // ── Centralized iframe SSO endpoints ─────────────────────────────────────
     //

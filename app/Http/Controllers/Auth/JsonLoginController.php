@@ -32,6 +32,7 @@ class JsonLoginController extends Controller
         $user = $request->user();
 
         return response()->json([
+            'two_factor' => false,
             'authenticated' => true,
             'user' => $this->publicUser($user),
         ]);

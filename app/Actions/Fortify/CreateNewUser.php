@@ -39,6 +39,7 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $sanitized['email'],
             'password' => $sanitized['password'],
             'role' => User::ROLE_STUDENT,
+            'email_verified_at' => now(),
         ]);
     }
 }

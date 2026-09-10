@@ -47,12 +47,14 @@ class SsoController extends Controller
 
             if (! $user) {
                 SsoAuditLog::logSessionCheckFailed('no_authenticated_user');
-                return $this->error('unauthenticated', 401);
-            }
 
-            if (method_exists($user, 'hasVerifiedEmail') && ! $user->hasVerifiedEmail()) {
-                SsoAuditLog::logSessionCheckFailed('email_not_verified');
-                return $this->error('email_unverified', 403);
+                // SPA axios treats 401 as a thrown error and shows
+                // "Unable to connect to the server." Return 200 so the
+                // client can read authenticated: false.
+                return $this->success([
+                    'authenticated' => false,
+                    'user' => null,
+                ]);
             }
 
             $electionActive = (bool) config('deoris_events.election_active', false);
@@ -268,6 +270,7 @@ class SsoController extends Controller
         return response()->json(array_merge([
             'success' => false,
             'error' => $error,
+            'message' => str_replace('_', ' ', $error),
         ], $extra), $status);
     }
 
