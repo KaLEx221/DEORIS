@@ -55,6 +55,24 @@ RUN pecl install redis \
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 # =========================
+# PHP-FPM Configuration
+# =========================
+RUN printf '%s\n' \
+'[www]' \
+'user = www-data' \
+'group = www-data' \
+'listen = 127.0.0.1:9000' \
+'pm = dynamic' \
+'pm.max_children = 20' \
+'pm.start_servers = 5' \
+'pm.min_spare_servers = 3' \
+'pm.max_spare_servers = 10' \
+'pm.max_requests = 500' \
+'pm.status_path = /fpm-status' \
+'catch_workers_output = yes' \
+> /usr/local/etc/php-fpm.d/www.conf
+
+# =========================
 # Working Directory
 # =========================
 WORKDIR /var/www/html
@@ -113,6 +131,10 @@ RUN printf '%s\n' \
 '    server_name _;' \
 '    root /var/www/html/public;' \
 '    index index.php index.html;' \
+'    client_max_body_size 100M;' \
+'    proxy_connect_timeout 120s;' \
+'    proxy_send_timeout 120s;' \
+'    proxy_read_timeout 120s;' \
 '' \
 '    location / {' \
 '        try_files $uri $uri/ /index.php?$query_string;' \
@@ -123,6 +145,9 @@ RUN printf '%s\n' \
 '        fastcgi_pass 127.0.0.1:9000;' \
 '        fastcgi_index index.php;' \
 '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;' \
+'        fastcgi_connect_timeout 120s;' \
+'        fastcgi_send_timeout 120s;' \
+'        fastcgi_read_timeout 120s;' \
 '        include fastcgi_params;' \
 '    }' \
 '}' \
