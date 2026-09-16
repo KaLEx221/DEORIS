@@ -15,11 +15,11 @@ class PortalCspMiddleware
         $response = $next($request);
 
         // ── Landing page gets a relaxed CSP so CDN assets load freely ──────
-        if ($request->is('/') || $request->routeIs('landing')
+        if (! auth()->check() && ($request->is('/') || $request->routeIs('landing')
             || $request->is('login') || $request->is('register')
             || $request->routeIs('login') || $request->routeIs('register')
             || $request->routeIs('password.*') || $request->routeIs('verification.*')
-        ) {
+        )) {
             $csp = implode('; ', [
                 "default-src 'self'",
                 "base-uri 'self'",
