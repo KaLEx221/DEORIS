@@ -82,18 +82,20 @@ final class ModuleRegistry
      *
      * @return array<string, array{url: string, label: string}>
      */
-    public function links(): array
-    {
-        $urls = config('modules.urls', []);
-        $labels = config('modules.labels', []);
+ public function links(): array
+{
+    $urls = config('modules.urls', []);
+    $labels = config('modules.labels', []);
 
-        return collect($this->all())
-            ->map(fn (array $module, string $key) => [
-                'url' => $urls[$key] ?? $module['url'],
-                'label' => $labels[$key] ?? $module['label'],
-            ])
-            ->all();
-    }
+    return collect($this->all())
+        ->map(fn (array $module, string $key) => [
+            'url' => $key === 'entryease'
+                ? preg_replace('#^http://#i', 'https://', $urls[$key] ?? $module['url'])
+                : ($urls[$key] ?? $module['url']),
+            'label' => $labels[$key] ?? $module['label'],
+        ])
+        ->all();
+}
 
     /**
      * Get all module URLs (resolved from config or default).
