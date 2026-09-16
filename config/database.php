@@ -42,11 +42,11 @@ return [
         |----------------------------------------------------------------------
         */
         'deoris' => [
-            'driver'    => 'mysql',
+            'driver'    => env('DB_CONNECTION', 'mysql'),
             'url'       => env('DB_URL'),
             'host'      => env('DB_HOST', '127.0.0.1'),
             'port'      => env('DB_PORT', '3306'),
-            'database'  => 'deoris_identity_db',   // hardcoded — never inherits env bleed
+            'database'  => env('DB_DATABASE', 'deoris_identity_db'),
             'username'  => env('DB_USERNAME', 'root'),
             'password'  => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
@@ -56,13 +56,10 @@ return [
             'prefix_indexes' => true,
             'strict'    => true,
             'engine'    => null,
-            // Force USE deoris_identity_db on every new PDO connection.
-            // This prevents XAMPP worker-thread reuse from bleeding a module's
-            // DB_DATABASE (e.g. deoris_taskflow) into Sanctum token lookups.
-            'options'   => extension_loaded('pdo_mysql') ? array_filter([
+            'options'   => extension_loaded('pdo_mysql') && env('DB_CONNECTION', 'mysql') === 'mysql' ? array_filter([
                 (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'USE `deoris_identity_db`',
-            ]) : [PDO::MYSQL_ATTR_INIT_COMMAND => 'USE `deoris_identity_db`'],
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'USE `' . env('DB_DATABASE', 'deoris_identity_db') . '`',
+            ]) : [],
         ],
 
         'sqlite' => [

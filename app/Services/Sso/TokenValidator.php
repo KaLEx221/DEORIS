@@ -165,27 +165,51 @@ class TokenValidator
     {
         $cfg = config('database.connections.deoris');
 
-        $dsn = sprintf(
-            'mysql:host=%s;port=%s;dbname=deoris_identity_db;charset=%s',
-            $cfg['host']    ?? '127.0.0.1',
-            $cfg['port']    ?? '3306',
-            $cfg['charset'] ?? 'utf8mb4'
-        );
+        $driver = (string) ($cfg['driver'] ?? config('database.default', 'mysql'));
+        $host = $cfg['host'] ?? '127.0.0.1';
+        $port = $cfg['port'] ?? ($driver === 'pgsql' ? '5432' : '3306');
+        $database = $cfg['database'] ?? 'deoris_identity_db';
+        $connectTimeout = max(1, (int) env('DB_CONNECT_TIMEOUT', 5));
+
+        $dsn = match ($driver) {
+            'pgsql' => sprintf(
+                'pgsql:host=%s;port=%s;dbname=%s;connect_timeout=%d',
+                $host,
+                $port,
+                $database,
+                $connectTimeout
+            ),
+            'mysql' => sprintf(
+                'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+                $host,
+                $port,
+                $database,
+                $cfg['charset'] ?? 'utf8mb4'
+            ),
+            default => throw new \RuntimeException('Unsupported SSO database driver: ' . $driver),
+        };
+
+        $options = [
+            \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ,
+            \PDO::ATTR_EMULATE_PREPARES   => false,
+            \PDO::ATTR_PERSISTENT         => false,
+        ];
+
+        if ($driver === 'mysql') {
+            $options[\PDO::ATTR_TIMEOUT] = $connectTimeout;
+        }
 
         $pdo = new \PDO(
             $dsn,
             $cfg['username'] ?? 'root',
             $cfg['password'] ?? '',
-            [
-                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ,
-                \PDO::ATTR_EMULATE_PREPARES   => false,
-                \PDO::ATTR_PERSISTENT         => false,  // never reuse
-            ]
+            $options
         );
 
-        // Belt-and-suspenders: explicit USE even though it's in the DSN
-        $pdo->exec('USE `deoris_identity_db`');
+        if ($driver === 'mysql') {
+            $pdo->exec('USE `' . str_replace('`', '``', $database) . '`');
+        }
 
         return $pdo;
     }
