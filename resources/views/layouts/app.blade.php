@@ -17,6 +17,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="deoris-user-id" content="{{ $user?->id }}">
         <meta name="deoris-reverb-enabled" content="{{ config('broadcasting.default') === 'reverb' ? 'true' : 'false' }}">
+        <meta name="deoris-reverb-app-key" content="{{ config('broadcasting.connections.reverb.key', '') }}">
 
         <title>{{ config('app.name', 'DEORIS Portal') }}</title>
         <link rel="icon" type="image/png" href="{{ asset('login_ui/assets/logo.png') }}?v=6">

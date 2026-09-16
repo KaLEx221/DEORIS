@@ -89,9 +89,7 @@ final class ModuleRegistry
 
     return collect($this->all())
         ->map(fn (array $module, string $key) => [
-            'url' => $key === 'entryease'
-                ? preg_replace('#^http://#i', 'https://', $urls[$key] ?? $module['url'])
-                : ($urls[$key] ?? $module['url']),
+            'url' => $this->normalizeUrl($urls[$key] ?? $module['url']),
             'label' => $labels[$key] ?? $module['label'],
         ])
         ->all();
@@ -107,10 +105,15 @@ final class ModuleRegistry
         $configured = config('modules.urls', []);
 
         return collect($this->all())
-            ->map(fn (array $module, string $key) => $configured[$key] ?? $module['url'])
+            ->map(fn (array $module, string $key) => $this->normalizeUrl($configured[$key] ?? $module['url']))
             ->filter()
             ->values()
             ->all();
+    }
+
+    private function normalizeUrl(string $url): string
+    {
+        return (string) preg_replace('#^http://#i', 'https://', trim($url));
     }
 
     /**

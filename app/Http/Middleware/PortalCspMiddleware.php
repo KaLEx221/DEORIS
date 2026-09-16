@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Services\ModuleRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Vite;
 
@@ -42,10 +43,7 @@ class PortalCspMiddleware
         }
 
         // ── All other portal routes keep the strict CSP ──────────────────
-        $moduleUrls = collect(config('deoris_events.modules', []))
-            ->pluck('url')
-            ->filter()
-            ->toArray();
+        $moduleUrls = app(ModuleRegistry::class)->urls();
 
         $portal = rtrim((string) config('app.url', 'https://deoris.test'), '/');
 

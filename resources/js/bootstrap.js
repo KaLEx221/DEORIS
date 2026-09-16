@@ -25,11 +25,19 @@ window.initDeorisEcho = function initDeorisEcho() {
 
     const reverbScheme = import.meta.env.VITE_REVERB_SCHEME ?? 'https';
     const reverbPort = Number(import.meta.env.VITE_REVERB_PORT ?? 8081);
+    const reverbAppKey = import.meta.env.VITE_REVERB_APP_KEY
+        || document.querySelector('meta[name="deoris-reverb-app-key"]')?.content
+        || '';
+
+    if (!reverbAppKey) {
+        return null;
+    }
+
     const useTls = reverbScheme === 'https';
 
     echoInstance = new Echo({
         broadcaster: 'reverb',
-        key: import.meta.env.VITE_REVERB_APP_KEY,
+        key: reverbAppKey,
         wsHost: import.meta.env.VITE_REVERB_HOST ?? window.location.hostname,
         wsPort: reverbPort,
         wssPort: reverbPort,
