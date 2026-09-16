@@ -33,12 +33,15 @@ return [
     // Every first-party DEORIS host that may call the portal API with cookies.
     // Sanctum will authenticate these requests through the web session first,
     // then fall back to bearer tokens only for token-only calls like exchange.
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s,%s',
-        'deoris.vercel.app,deoris.onrender.com,deoris.test,entryease.deoris.test,enrollease.deoris.test,gradetrack.deoris.test,meditrack.deoris.test,librarysys.deoris.test,taskflow.deoris.test,careerconnect.deoris.test,assesspay.deoris.test,votesys.deoris.test,clearcheck.deoris.test,localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
-        Sanctum::currentApplicationUrlWithPort(),
-        // Sanctum::currentRequestHost(),
-    ))),
+    'stateful' => array_values(array_unique(array_filter(array_merge(
+        explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
+            '%s,%s',
+            'deoris.vercel.app,deoris.onrender.com,deoris.test,entryease.deoris.test,entryease.onrender.com,enrollease.deoris.test,gradetrack.deoris.test,meditrack.deoris.test,librarysys.deoris.test,taskflow.deoris.test,careerconnect.deoris.test,assesspay.deoris.test,votesys.deoris.test,clearcheck.deoris.test,localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+            Sanctum::currentApplicationUrlWithPort(),
+            // Sanctum::currentRequestHost(),
+        ))),
+        ['entryease.onrender.com'],
+    )))),
 
     /*
     |--------------------------------------------------------------------------

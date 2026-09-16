@@ -60,7 +60,7 @@ return [
         'https://deoris.onrender.com',
         env('APP_URL', 'https://deoris.onrender.com'),
         env('FRONTEND_URL', 'https://deoris.vercel.app'),
-        env('ENTRYEASE_URL', 'https://entryease.deoris.test'),
+        env('ENTRYEASE_URL', 'https://entryease.onrender.com'),
         env('ENROLLEASE_URL', 'https://enrollease.deoris.test'),
         env('GRADETRACK_URL', 'https://gradetrack.deoris.test'),
         env('MEDITRACK_URL', 'https://meditrack.deoris.test'),

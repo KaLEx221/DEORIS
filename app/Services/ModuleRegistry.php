@@ -16,7 +16,7 @@ final class ModuleRegistry
         return [
             'entryease' => [
                 'env' => 'ENTRYEASE_URL',
-                'url' => 'https://entryease.deoris.test',
+                'url' => env('ENTRYEASE_URL', 'https://entryease.onrender.com'),
                 'legacy' => 'EntryEase',
                 'label' => 'EntryEase',
             ],

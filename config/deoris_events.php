@@ -59,7 +59,7 @@ return [
         'EntryEase' => [
             'key' => 'entryease',
             'label' => 'EntryEase',
-            'url' => env('ENTRYEASE_URL', 'https://entryease.deoris.test'),
+            'url' => env('ENTRYEASE_URL', 'https://entryease.onrender.com'),
             'secret' => env('ENTRYEASE_EVENT_SECRET'),
             'search_token' => env('ENTRYEASE_SEARCH_TOKEN'),
         ],

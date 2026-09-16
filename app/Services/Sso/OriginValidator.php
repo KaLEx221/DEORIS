@@ -14,7 +14,7 @@ namespace App\Services\Sso;
  * ║  • Cross-site request forgery via postMessage                         ║
  * ║  • Hostile iframe injection of fake identity                          ║
  * ║                                                                        ║
- * ║ The allowlist is frozen at class load time and cannot be modified.   ║
+ * ║ The allowlist is explicit and cannot be modified by callers.          ║
  * ║ Any changes to the allowlist must be reviewed by a security architect.║
  * ╚════════════════════════════════════════════════════════════════════════╝
  */
@@ -29,23 +29,27 @@ class OriginValidator
      * - Explicitly listed (no wildcards or patterns)
      * - A first-party subdomain of the portal domain
      *
-     * @var array<int, string>
+     * @return array<int, string>
      */
-    private const ALLOWED_ORIGINS = [
-        'https://deoris.vercel.app',
-        'https://deoris.onrender.com',
-        'https://deoris.test',
-        'https://entryease.deoris.test',
-        'https://enrollease.deoris.test',
-        'https://gradetrack.deoris.test',
-        'https://meditrack.deoris.test',
-        'https://librarysys.deoris.test',
-        'https://taskflow.deoris.test',
-        'https://careerconnect.deoris.test',
-        'https://assesspay.deoris.test',
-        'https://votesys.deoris.test',
-        'https://clearcheck.deoris.test',
-    ];
+    private static function allowedOrigins(): array
+    {
+        return [
+            'https://deoris.vercel.app',
+            'https://deoris.onrender.com',
+            'https://deoris.test',
+            'https://entryease.deoris.test',
+            config('modules.urls.entryease', 'https://entryease.onrender.com'),
+            'https://enrollease.deoris.test',
+            'https://gradetrack.deoris.test',
+            'https://meditrack.deoris.test',
+            'https://librarysys.deoris.test',
+            'https://taskflow.deoris.test',
+            'https://careerconnect.deoris.test',
+            'https://assesspay.deoris.test',
+            'https://votesys.deoris.test',
+            'https://clearcheck.deoris.test',
+        ];
+    }
 
     /**
      * Validate that an origin is allowed to make SSO requests.
@@ -66,8 +70,8 @@ class OriginValidator
             return false;
         }
 
-        // Exact string match against frozen allowlist
-        return in_array($origin, self::ALLOWED_ORIGINS, true);
+        // Exact string match against the explicit allowlist
+        return in_array($origin, self::allowedOrigins(), true);
     }
 
     /**
@@ -77,7 +81,7 @@ class OriginValidator
      */
     public static function getAllowedOrigins(): array
     {
-        return self::ALLOWED_ORIGINS;
+        return self::allowedOrigins();
     }
 
     /**

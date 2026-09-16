@@ -13,7 +13,7 @@ return [
     */
 
     'urls' => [
-        'entryease' => env('ENTRYEASE_URL', 'https://entryease.deoris.net'),
+        'entryease' => env('ENTRYEASE_URL', 'https://entryease.onrender.com'),
         'enrollease' => env('ENROLLEASE_URL', 'https://enrollease.deoris.net'),
         'gradetrack' => env('GRADETRACK_URL', 'https://gradetrack.deoris.net'),
         'meditrack' => env('MEDITRACK_URL', 'https://meditrack.deoris.net'),
@@ -53,7 +53,7 @@ return [
     */
 
     'allowed' => [
-        'https://entryease.deoris.net',
+        env('ENTRYEASE_URL', 'https://entryease.onrender.com'),
         'https://enrollease.deoris.net',
         'https://gradetrack.deoris.net',
         'https://meditrack.deoris.net',

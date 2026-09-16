@@ -20,11 +20,11 @@ class ServiceRegistrySeeder extends Seeder
             [
                 'service_key'      => 'entryease',
                 'label'            => 'EntryEase',
-                'url'              => env('ENTRYEASE_URL', 'https://entryease.deoris.test'),
+                'url'              => env('ENTRYEASE_URL', 'https://entryease.onrender.com'),
                 'api_version'      => 'v1',
                 'status'           => ServiceRegistry::STATUS_ACTIVE,
                 'allowed_roles'    => [User::ROLE_ADMIN, User::ROLE_STUDENT, User::ROLE_ADMISSION_OFFICER],
-                'health_check_url' => env('ENTRYEASE_URL', 'https://entryease.deoris.test').'/up',
+                'health_check_url' => env('ENTRYEASE_URL', 'https://entryease.onrender.com').'/up',
                 'environment_config' => [
                     'event_secret_env' => 'ENTRYEASE_EVENT_SECRET',
                     'search_token_env' => 'ENTRYEASE_SEARCH_TOKEN',
